@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ stock.code }} {{ stock.name }} | 個股詳細資料</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>📊</text></svg>">
+</head>
+<body data-code="{{ stock.code }}">
+<div class="wrap">
+
+  <a class="backlink" href="/" target="_blank">← 回觀察清單</a>
+
+  <div class="dhead" id="dhead">
+    <div>
+      <h1>{{ stock.code }} {{ stock.name }}</h1>
+      <div class="sub" id="subInfo">載入中…</div>
+    </div>
+    <div class="spacer"></div>
+    <div style="text-align:right">
+      <div class="px" id="px">—</div>
+      <div class="chg" id="chg">—</div>
+    </div>
+    <div class="gradebox">
+      <div class="g" id="grade">—</div>
+      <div class="t" id="gradeTxt">綜合評分</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="stack">
+      <div class="card">
+        <h3>K 線圖
+          <span class="tag" id="chartTag">日 K · 均線 · 成交量 · MACD · KD</span>
+          <span class="periods" id="periods">
+            <button data-p="3mo">3月</button>
+            <button data-p="6mo">6月</button>
+            <button data-p="1y" class="on">1年</button>
+            <button data-p="2y">2年</button>
+          </span>
+        </h3>
+        <div id="kchart"></div>
+      </div>
+
+      <div class="card">
+        <h3>近 10 個交易日</h3>
+        <div class="tablewrap">
+          <table style="min-width:640px">
+            <thead><tr>
+              <th style="text-align:left">日期</th><th>開盤</th><th>最高</th><th>最低</th>
+              <th>收盤</th><th>漲跌幅</th><th>成交量(張)</th>
+            </tr></thead>
+            <tbody id="recent"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <h3>評分拆解 <span class="tag" id="totalTag"></span></h3>
+        <div class="bd" id="breakdown"></div>
+      </div>
+
+      <div class="card">
+        <h3>技術指標</h3>
+        <div class="kv" id="tech"></div>
+      </div>
+
+      <div class="card">
+        <h3>基本面</h3>
+        <div class="kv" id="fund"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    資料來源：Yahoo Finance 日 K 線與基本面欄位；中文名稱來自證交所 / 櫃買中心 OpenAPI。<br>
+    ⚠️ 本頁所有指標與評分僅為量化研究參考，不構成投資建議。
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="{{ url_for('static', filename='js/echarts.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/detail.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>台股智慧篩選雷達 | Stock Radar</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>📈</text></svg>">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">📈</div>
+      <div>
+        <h1>台股智慧篩選雷達</h1>
+        <div class="sub">五大構面評分 · 依投資價值排序 · 真實市場資料</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="meta">
+      資料日期 <b id="dataDate">—</b><br>
+      更新時間 <b id="updatedAt">—</b>
+    </div>
+    <button class="btn primary" id="btnRefresh">↻ 重新整理</button>
+  </div>
+
+  <div class="toolbar">
+    <div class="searchbox">
+      <input type="text" id="addInput" placeholder="輸入股票代碼或名稱新增，例如 2330 或 台積電" autocomplete="off">
+      <div class="suggest" id="suggest" hidden></div>
+    </div>
+    <button class="btn primary" id="btnAdd">＋ 加入觀察</button>
+    <div class="spacer"></div>
+    <div class="sortgroup" id="sortGroup">
+      <button data-sort="score" class="on">綜合評分</button>
+      <button data-sort="change">漲跌幅</button>
+      <button data-sort="trend">趨勢</button>
+      <button data-sort="value">價值</button>
+      <button data-sort="code">代碼</button>
+    </div>
+    <button class="btn" id="btnReset">回復預設 20 檔</button>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="card">
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th><th>代碼</th><th>名稱</th>
+            <th>收盤</th><th>漲跌</th><th>漲跌幅</th>
+            <th>成交量(張)</th>
+            <th>5日</th><th>20日</th>
+            <th>RSI</th><th>月線乖離</th>
+            <th>構面</th><th>評分</th><th>評等</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="15"><div class="loading"><div class="spin"></div>正在向 Yahoo Finance 與證交所取得即時資料…</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="note">
+    資料來源：Yahoo Finance（日 K 線、本益比、股價淨值比、殖利率）、臺灣證券交易所 TWSE OpenAPI 與櫃買中心 TPEx OpenAPI（全市場代碼與中文名稱）。<br>
+    評分規則：趨勢結構 30 分 ＋ 動能表現 25 分 ＋ 量能結構 15 分 ＋ 風險控制 15 分 ＋ 價值評估 15 分，滿分 100，依總分由高至低排序。點擊任一列可開新視窗檢視個股詳細資料與 K 線圖。<br>
+    ⚠️ 本工具為技術面與基本面量化評分之研究用途，所有評級僅為指標彙整結果，不構成任何投資建議或買賣推薦。投資決策請自行判斷並承擔風險。
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
