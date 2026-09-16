@@ -105,6 +105,33 @@ static/          style.css、app.js、detail.js、echarts.min.js（已內建，�
 
 ---
 
+## ☁️ 部署到 Render
+
+本專案是 Flask 伺服器應用，需要 Python 執行環境。
+**Netlify / GitHub Pages 這類純靜態平台無法運行**，請使用 Render（或 Railway、Fly.io 等支援 Python 的平台）。
+
+repo 根目錄已附 `render.yaml`，步驟：
+
+1. 到 [dashboard.render.com](https://dashboard.render.com) 用 GitHub 帳號登入
+2. **New → Blueprint** → 選擇 `Stock-Radar-API` 這個 repo
+3. Render 會自動讀取 `render.yaml`，按 **Apply** 即開始建置
+4. 完成後取得網址 `https://stock-radar-xxxx.onrender.com`
+
+之後推送到 `main` 分支會自動重新部署。
+
+### 線上版的已知限制
+
+| 項目 | 說明 |
+|------|------|
+| 冷啟動 | 免費方案閒置 15 分鐘會休眠，下次開啟需等約 50 秒喚醒 |
+| 觀察清單 | 存在容器本機檔案，**重新部署或休眠重啟後會重置回預設 20 檔** |
+| 記憶體 | 免費方案 512MB，pandas/numpy 佔用較高，故設定為單一 worker |
+| 首次載入 | 一次並行抓 20 支股票行情，約需 10～30 秒 |
+
+若要讓觀察清單永久保存，需將 `store.py` 改接雲端資料庫（如 Supabase / Postgres）。
+
+---
+
 ## ⚠️ 免責聲明
 
 本程式是**技術面與基本面指標的量化彙整工具**，供研究與自我學習使用。
