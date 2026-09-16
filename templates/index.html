@@ -45,34 +45,52 @@
 
   <div class="stats" id="stats"></div>
 
-  <div class="card">
-    <div class="tablewrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th><th>代碼</th><th>名稱</th>
-            <th>收盤</th><th>漲跌</th><th>漲跌幅</th>
-            <th>成交量(張)</th>
-            <th>5日</th><th>20日</th>
-            <th>RSI</th><th>月線乖離</th>
-            <th>構面</th><th>評分</th><th>評等</th><th></th>
-          </tr>
-        </thead>
-        <tbody id="tbody">
-          <tr><td colspan="15"><div class="loading"><div class="spin"></div>正在向 Yahoo Finance 與證交所取得即時資料…</div></td></tr>
-        </tbody>
-      </table>
+  <!-- 左：觀察清單　右：個股明細面板（點列即在右側載入，不離開本頁） -->
+  <div class="layout" id="layout">
+    <div class="card listcard">
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>代碼</th><th>名稱</th>
+              <th>收盤</th><th>漲跌</th><th>漲跌幅</th>
+              <th>成交量(張)</th>
+              <th>5日</th><th>20日</th>
+              <th>RSI</th><th>月線乖離</th>
+              <th>構面</th><th>評分</th><th>評等</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="15"><div class="loading"><div class="spin"></div>正在向 Yahoo Finance 與證交所取得即時資料…</div></td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
+
+    <aside class="sidepanel" id="sidepanel" hidden>
+      <div class="sidepanel-bar">
+        <span class="sidepanel-title">個股明細</span>
+        <div class="spacer"></div>
+        <button class="iconbtn" id="btnPanelPrev" title="上一檔（↑）">↑</button>
+        <button class="iconbtn" id="btnPanelNext" title="下一檔（↓）">↓</button>
+        <button class="iconbtn" id="btnPanelPop" title="開新視窗檢視">⤢</button>
+        <button class="iconbtn" id="btnPanelClose" title="關閉（Esc）">✕</button>
+      </div>
+      <div class="sidepanel-body" id="panelRoot"></div>
+    </aside>
   </div>
 
   <div class="note">
     資料來源：Yahoo Finance（日 K 線、本益比、股價淨值比、殖利率）、臺灣證券交易所 TWSE OpenAPI 與櫃買中心 TPEx OpenAPI（全市場代碼與中文名稱）。<br>
-    評分規則：趨勢結構 30 分 ＋ 動能表現 25 分 ＋ 量能結構 15 分 ＋ 風險控制 15 分 ＋ 價值評估 15 分，滿分 100，依總分由高至低排序。點擊任一列可開新視窗檢視個股詳細資料與 K 線圖。<br>
+    評分規則：趨勢結構 30 分 ＋ 動能表現 25 分 ＋ 量能結構 15 分 ＋ 風險控制 15 分 ＋ 價值評估 15 分，滿分 100，依總分由高至低排序。<br>
+    操作說明：點擊任一列即在右側面板顯示該股 K 線與完整指標，清單不會重新載入；用 ↑ ↓ 可快速切換上下一檔，Esc 關閉面板，⤢ 另開視窗。<br>
     ⚠️ 本工具為技術面與基本面量化評分之研究用途，所有評級僅為指標彙整結果，不構成任何投資建議或買賣推薦。投資決策請自行判斷並承擔風險。
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
+<script src="{{ url_for('static', filename='js/echarts.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/detail-view.js') }}"></script>
 <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

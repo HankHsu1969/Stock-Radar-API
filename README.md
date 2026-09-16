@@ -1,8 +1,8 @@
 # 台股智慧篩選雷達 Stock Radar
 
 Python + Flask 的台股篩選 WebUI。預設載入 **20 支熱門股票**，可自由新增／刪除，
-對每一檔做 **五大構面量化評分**，依總分由高至低排序，點任一列會**開新視窗**顯示
-個股詳細資料與 **K 線圖**。
+對每一檔做 **五大構面量化評分**，依總分由高至低排序，點任一列會在**右側面板**即時顯示
+個股詳細資料與 **K 線圖**，清單不會重新載入。
 
 所有數字皆為**真實市場資料**，透過 API 即時取得，沒有任何模擬或寫死的行情。
 
@@ -70,7 +70,11 @@ Windows 也可以直接雙擊 `run.bat`。
 - ✕ 移除個股；「回復預設 20 檔」可還原
 - 清單存在 `watchlist.json`，關掉程式再開仍在
 
-**個股詳細視窗**（點任一列開新視窗）
+**個股明細面板**（點任一列在右側展開）
+
+面板開啟後清單仍在原地，切換個股只會請求該檔資料，不會重抓整份觀察清單。
+操作：↑ ↓ 切換上下一檔、`Esc` 關閉、⤢ 另開獨立視窗（`/stock/<code>` 仍可單獨使用）。
+
 - K 線圖：日 K＋MA5/20/60＋布林通道，下方三格為成交量、MACD、KD，可框選縮放
 - 期間切換 3 月 / 6 月 / 1 年 / 2 年
 - 評分拆解（含各構面得分理由）、技術指標、基本面、近 10 個交易日明細
@@ -88,8 +92,9 @@ data_source.py   Yahoo Finance / TWSE / TPEx 取數與快取
 indicators.py    MA、RSI、MACD、KD、布林、ATR、最大回撤
 rating.py        五大構面評分引擎
 store.py         watchlist.json 讀寫
-templates/       index.html（清單）、detail.html（個股）
-static/          style.css、app.js、detail.js、echarts.min.js（已內建，離線可用）
+templates/       index.html（清單＋右側明細面板）、detail.html（個股獨立頁）
+static/          style.css、app.js、detail-view.js（明細渲染，兩處共用）、
+                 detail.js、echarts.min.js（已內建，離線可用）
 ```
 
 ## API

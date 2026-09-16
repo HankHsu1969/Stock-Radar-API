@@ -4,6 +4,8 @@
 
   var stocks = [];
   var sortKey = "score";
+  var view = null;        // 右側面板的 StockDetail 實例（延遲建立）
+  var selected = null;    // 目前在面板中檢視的股票代碼
 
   var $ = function (id) { return document.getElementById(id); };
 
@@ -112,12 +114,13 @@
     var list = sorted();
     if (!list.length) {
       $("tbody").innerHTML = '<tr><td colspan="15"><div class="empty">觀察清單是空的，請於上方輸入代碼新增。</div></td></tr>';
+      closePanel();
       return;
     }
 
     $("tbody").innerHTML = list.map(function (s, i) {
       if (!s.ok) {
-        return '<tr class="bad" data-code="' + s.code + '"><td class="rank">–</td>' +
+        return '<tr class="bad' + (s.code === selected ? " sel" : "") + '" data-code="' + s.code + '"><td class="rank">–</td>' +
           '<td class="code">' + s.code + '</td><td class="nm">' + s.name + "</td>" +
           '<td colspan="11" style="text-align:left;color:var(--muted)">' + (s.error || "無資料") + "</td>" +
           '<td><div class="act"><button class="iconbtn del" data-del="' + s.code + '" title="移除">✕</button></div></td></tr>';
@@ -125,7 +128,7 @@
       var q = s.quote, rt = s.rating;
       var bias = q.ma20 ? (q.close / q.ma20 - 1) * 100 : null;
       var rank = i + 1;
-      return '<tr data-code="' + s.code + '">' +
+      return '<tr' + (s.code === selected ? ' class="sel"' : "") + ' data-code="' + s.code + '">' +
         '<td class="rank' + (rank <= 3 ? " top" : "") + '">' + rank + "</td>" +
         '<td class="code">' + s.code + "</td>" +
         '<td class="nm">' + s.name + '<span class="mk">' + (s.market === "TPEX" ? "上櫃" : "上市") + "</span></td>" +
@@ -142,15 +145,56 @@
         '<td><span class="grade ' + gradeCls(rt.grade) + '">' + rt.grade + "</span> " +
         '<span style="color:var(--muted);font-size:11.5px">' + rt.label + "</span></td>" +
         '<td><div class="act">' +
-        '<button class="iconbtn" data-open="' + s.code + '" title="開新視窗看詳細資料">⤢</button>' +
+        '<button class="iconbtn" data-open="' + s.code + '" title="另開視窗檢視">⤢</button>' +
         '<button class="iconbtn del" data-del="' + s.code + '" title="從清單移除">✕</button>' +
         "</div></td></tr>";
     }).join("");
   }
 
-  function openDetail(code) {
+  // ---------------------------------------------------------- 右側明細面板
+  function popoutDetail(code) {
     window.open("/stock/" + code, "stock_" + code,
       "width=1380,height=940,menubar=no,toolbar=no,location=no,resizable=yes,scrollbars=yes");
+  }
+
+  function markSelected() {
+    Array.prototype.forEach.call($("tbody").querySelectorAll("tr[data-code]"), function (tr) {
+      tr.classList.toggle("sel", tr.dataset.code === selected);
+    });
+  }
+
+  /* 在右側面板載入個股明細。只打 /api/stock/<code>，
+     觀察清單留在記憶體中不重抓，這正是取代開新視窗的目的。 */
+  function selectStock(code) {
+    if (!code) return;
+    selected = code;
+    $("sidepanel").hidden = false;
+    $("layout").classList.add("with-panel");
+    if (!view) view = StockDetail($("panelRoot"), { layout: "panel" });
+    view.load(code);
+    markSelected();
+    // 版面寬度改變後圖表需重算；等 layout 套用完再 resize
+    requestAnimationFrame(function () { view.resize(); });
+  }
+
+  function closePanel() {
+    selected = null;
+    $("sidepanel").hidden = true;
+    $("layout").classList.remove("with-panel");
+    markSelected();
+  }
+
+  /* 依目前排序順序切換上／下一檔（略過無資料的項目）。 */
+  function stepSelection(delta) {
+    var list = sorted().filter(function (s) { return s.ok; });
+    if (!list.length) return;
+    var idx = list.findIndex(function (s) { return s.code === selected; });
+    idx = idx < 0 ? 0 : idx + delta;
+    if (idx < 0) idx = list.length - 1;
+    if (idx >= list.length) idx = 0;
+    selectStock(list[idx].code);
+    var row = $("tbody").querySelector('tr[data-code="' + list[idx].code + '"]');
+    if (row) row.scrollIntoView({ block: "nearest" });
   }
 
   // ---------------------------------------------------------- 新增 / 刪除
@@ -184,6 +228,7 @@
         if (!d.ok) { toast(d.error || "移除失敗", "err"); return; }
         toast("已移除 " + code, "ok");
         stocks = stocks.filter(function (x) { return x.code !== code; });
+        if (selected === code) closePanel();
         render();
       });
   }
@@ -277,9 +322,26 @@
       var del = e.target.closest("button[data-del]");
       if (del) { e.stopPropagation(); delStock(del.dataset.del); return; }
       var op = e.target.closest("button[data-open]");
-      if (op) { e.stopPropagation(); openDetail(op.dataset.open); return; }
+      if (op) { e.stopPropagation(); popoutDetail(op.dataset.open); return; }
       var tr = e.target.closest("tr[data-code]");
-      if (tr) openDetail(tr.dataset.code);
+      if (tr) selectStock(tr.dataset.code);
     });
+
+    // ---- 面板工具列 ----
+    $("btnPanelClose").onclick = closePanel;
+    $("btnPanelPrev").onclick = function () { stepSelection(-1); };
+    $("btnPanelNext").onclick = function () { stepSelection(1); };
+    $("btnPanelPop").onclick = function () { if (selected) popoutDetail(selected); };
+
+    // ---- 鍵盤操作：Esc 關閉、↑↓ 切換上下一檔 ----
+    document.addEventListener("keydown", function (e) {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+      if (e.key === "Escape" && selected) { closePanel(); return; }
+      if (!selected) return;
+      if (e.key === "ArrowUp") { e.preventDefault(); stepSelection(-1); }
+      if (e.key === "ArrowDown") { e.preventDefault(); stepSelection(1); }
+    });
+
+    window.addEventListener("resize", function () { if (view) view.resize(); });
   });
 })();
